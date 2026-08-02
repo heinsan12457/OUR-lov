@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Our Little World ❤️</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            noir: {
+              bg: '#0d0d0f',
+              card: '#1a1a1f',
+              accent: '#d4af37',
+              rose: '#c97b84',
+              text: '#e8e3d9',
+              muted: '#9c9387',
+            }
+          },
+          fontFamily: {
+            script: ['Great Vibes', 'Dancing Script', 'cursive'],
+            body: ['Plus Jakarta Sans', 'Padauk', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Great+Vibes&family=Padauk:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', 'Padauk', sans-serif;
+      background: #0d0d0f;
+      margin: 0;
+      overflow-x: hidden;
+      color: #e8e3d9;
+    }
+    .dark-glass {
+      background: rgba(26, 26, 31, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(212, 175, 55, 0.15);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .gold-text {
+      background: linear-gradient(135deg, #d4af37 0%, #f5e6b8 50%, #c9972e 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .gold-border {
+      border: 1px solid rgba(212, 175, 55, 0.4);
+    }
+    .script-text {
+      font-family: 'Great Vibes', 'Dancing Script', cursive;
+    }
+    .serif-text {
+      font-family: 'Cormorant Garamond', serif;
+    }
+    
+    /* Sparkle particles */
+    .sparkle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9998;
+      animation: sparkleFloat 3s ease-out forwards;
+    }
+    @keyframes sparkleFloat {
+      0% { transform: translateY(0) scale(1); opacity: 0.9; }
+      100% { transform: translateY(-200px) scale(0); opacity: 0; }
+    }
+    
+    /* Rose petals */
+    .dark-petal {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9997;
+      animation: darkPetalFall linear infinite;
+    }
+    @keyframes darkPetalFall {
+      0% { transform: translate(0, -10vh) rotate(0deg); opacity: 0.7; }
+      100% { transform: translate(60px, 110vh) rotate(360deg); opacity: 0; }
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #1a1a1f; }
+    ::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // ---------- Dark Petal & Sparkle Background ----------
+    function DarkAtmosphere() {
+      useEffect(() => {
+        // Sparkles on mouse move
+        const handleMouse = (e) => {
+          if (Math.random() > 0.3) return;
+          const spark = document.createElement('div');
+          spark.className = 'sparkle';
+          spark.innerHTML = '✨';
+          spark.style.left = e.clientX + 'px';
+          spark.style.top = e.clientY + 'px';
+          spark.style.fontSize = (8 + Math.random() * 16) + 'px';
+          document.body.appendChild(spark);
+          setTimeout(() => spark.remove(), 3000);
+        };
+        // Dark rose petals
+        const createPetal = () => {
+          const petal = document.createElement('div');
+          petal.className = 'dark-petal';
+          petal.innerHTML = '🥀';
+          petal.style.left = Math.random() * 100 + 'vw';
+          petal.style.fontSize = (10 + Math.random() * 14) + 'px';
+          petal.style.animationDuration = (6 + Math.random() * 7) + 's';
+          petal.style.opacity = 0.4 + Math.random() * 0.3;
+          document.body.appendChild(petal);
+          setTimeout(() => petal.remove(), 13000);
+        };
+        window.addEventListener('mousemove', handleMouse);
+        const interval = setInterval(createPetal, 600);
+        return () => {
+          window.removeEventListener('mousemove', handleMouse);
+          clearInterval(interval);
+        };
+      }, []);
+      return null;
+    }
+
+    // ---------- Lockout hook ----------
+    function useLockout() {
+      const [wrong, setWrong] = useState(0);
+      const [lockout, setLockout] = useState(0);
+      useEffect(() => {
+        if (lockout > 0) {
+          const t = setTimeout(() => setLockout(l => l - 1), 1000);
+          return () => clearTimeout(t);
+        }
+      }, [lockout]);
+      const recordWrong = () => {
+        const next = wrong + 1;
+        setWrong(next);
+        if (next >= 5) { setLockout(30); setWrong(0); }
+      };
+      return { wrong, lockout, recordWrong };
+    }
+
+    // ---------- App ----------
+    function App() {
+      const [stage, setStage] = useState('landing'); // landing | password | unlock | main
+      const audioRef = useRef(null);
+      const { wrong, lockout, recordWrong } = useLockout();
+
+      const playAmbient = () => {
+        if (audioRef.current) {
+          audioRef.current.volume = 0.25;
+          audioRef.current.play().catch(() => {});
+        }
+      };
+
+      const handleSuccess = () => {
+        playAmbient();
+        setStage('unlock');
+        setTimeout(() => setStage('main'), 2500);
+      };
+
+      return (
+        <div className="min-h-screen bg-noir-bg relative">
+          <DarkAtmosphere />
+          {/* FIXED: Use a relative or web URL for the audio file */}
+          <audio ref={audioRef} loop preload="auto"
+            src="Audio\TWO.mp3">
+          </audio>
+
+          <div className="relative z-10">
+            {stage === 'landing' && <LandingPage onEnter={() => setStage('password')} />}
+            {stage === 'password' && (
+              <PasswordScreen wrong={wrong} lockout={lockout} onWrong={recordWrong} onSuccess={handleSuccess} />
+            )}
+            {stage === 'unlock' && <UnlockAnimation />}
+            {stage === 'main' && <MainSite audioRef={audioRef} />}
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Landing ----------
+    function LandingPage({ onEnter }) {
+      return (
+        <div className="min-h-screen flex items-center justify-center px-4">
+          <div className="dark-glass rounded-3xl p-12 md:p-16 max-w-lg w-full text-center space-y-8 border border-noir-accent/20">
+            <div className="text-7xl animate-pulse">🖤🌹</div>
+            <h1 className="text-5xl md:text-6xl font-bold gold-text script-text">Our Dark Romance</h1>
+            <p className="text-noir-muted text-lg serif-text italic">a universe built for two souls</p>
+            <button onClick={onEnter}
+              className="bg-noir-accent hover:bg-amber-600 text-black font-bold py-4 px-10 rounded-full text-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(212,175,55,0.3)]">
+              Enter Our World ✦
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Password ----------
+    function PasswordScreen({ wrong, lockout, onWrong, onSuccess }) {
+      const [input, setInput] = useState('');
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (lockout > 0) return;
+        if (input === '1982011') onSuccess();
+        else { onWrong(); setInput(''); }
+      };
+
+      const hint = () => {
+        if (lockout > 0) return null;
+        if (wrong === 1) return { emoji: '🥀', text: 'ကိုယ့်ကလေးလေးမှားသွားပြီ နောက်တစ်ခါကြိုးစားကြည့်...' };
+        if (wrong === 2) return { emoji: '🖤', text: 'ကလေးမွေးနေ့ကို ရက် လ နှစ် အစဉ်လိုက် ထည့်ကြည့်နော်' };
+        if (wrong >= 3) return { emoji: '🌑', text: 'မှန်အောင်ကြိုးစားပါဦး၊ ကလေးရဲ့မွေးနေ့ပဲလေ' };
+        return null;
+      };
+      const h = hint();
+
+      return (
+        <div className="min-h-screen flex items-center justify-center px-4">
+          <div className="dark-glass p-10 rounded-3xl max-w-md w-full text-center space-y-6 border border-noir-accent/20">
+            <div className="text-5xl">🔐</div>
+            <h2 className="text-xl font-bold text-noir-text">Only she holds the key</h2>
+            {lockout > 0 ? (
+              <div className="space-y-3">
+                <span className="text-4xl">⏳</span>
+                <p className="text-noir-accent font-bold">Patience, my love</p>
+                <p className="text-noir-muted">{lockout} seconds remaining</p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <input type="password" value={input} onChange={e => setInput(e.target.value)}
+                  placeholder="Secret code..."
+                  className="w-full px-5 py-3 rounded-full text-center bg-black/50 border border-noir-accent/30 text-noir-text placeholder-noir-muted focus:border-noir-accent outline-none text-lg tracking-widest" />
+                <button type="submit"
+                  className="w-full bg-noir-accent hover:bg-amber-500 text-black font-bold py-3 rounded-full transition-all active:scale-95 shadow-lg">
+                  Unlock 🖤
+                </button>
+              </form>
+            )}
+            {h && (
+              <div className="mt-4 p-4 bg-black/40 rounded-2xl border border-noir-accent/20">
+                <span className="text-3xl">{h.emoji}</span>
+                <p className="text-noir-muted text-sm mt-1">{h.text}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Unlock animation ----------
+    function UnlockAnimation() {
+      useEffect(() => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md';
+        overlay.innerHTML = `<div class="text-center space-y-4"><span class="text-8xl animate-ping">💛</span><h2 class="text-3xl font-bold gold-text">Unlocked...</h2></div>`;
+        document.body.appendChild(overlay);
+        setTimeout(() => { overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 800); }, 2000);
+      }, []);
+      return null;
+    }
+
+    // ---------- Main Site ----------
+    function MainSite({ audioRef }) {
+      const [surprise, setSurprise] = useState(false);
+      const [secretClicks, setSecretClicks] = useState(0);
+      const handleSecret = () => {
+        const n = secretClicks + 1;
+        setSecretClicks(n);
+        if (n >= 5) {
+          alert("🖤 Secret message:\n\"In every lifetime, I'd find you and love you again.\"");
+          setSecretClicks(0);
+        }
+      };
+
+      return (
+        <div className="space-y-32 pb-24">
+          {/* Hero */}
+          <section className="min-h-screen flex items-center justify-center px-4 text-center">
+            <div className="dark-glass p-12 md:p-16 rounded-3xl max-w-2xl w-full space-y-8 border border-noir-accent/20">
+              <div className="w-48 h-48 mx-auto rounded-full bg-gradient-to-br from-noir-accent/20 to-noir-rose/20 flex items-center justify-center border-2 border-noir-accent/40">
+                <span className="text-7xl">🖤👑</span>
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold gold-text script-text">My Eternal Queen</h1>
+              <p className="text-xl text-noir-muted serif-text italic">"You are the poetry my soul never knew it could write."</p>
+            </div>
+          </section>
+
+          {/* Counter */}
+          <section className="max-w-3xl mx-auto px-4">
+            <LoveCounter start="2026-05-02" />
+          </section>
+
+          {/* Letter */}
+          <section className="max-w-2xl mx-auto px-4">
+            <DarkLetter />
+          </section>
+
+          {/* Timeline */}
+          <section className="max-w-4xl mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center gold-text script-text mb-12">Our Timeline</h2>
+            <Timeline />
+          </section>
+
+          {/* Reasons */}
+          <section className="max-w-6xl mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center gold-text script-text mb-4">20 Reasons</h2>
+            <p className="text-center text-noir-muted mb-10 serif-text">Why my soul chose yours</p>
+            <ReasonsGrid />
+          </section>
+
+          {/* Gallery */}
+          <section className="max-w-5xl mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center gold-text script-text mb-12">Gallery of Us</h2>
+            <Gallery />
+          </section>
+
+          {/* Wish Wall */}
+          <section className="max-w-3xl mx-auto px-4">
+            <WishWall />
+          </section>
+
+          {/* Floating controls */}
+          <MusicPlayer audioRef={audioRef} />
+          <button onClick={() => setSurprise(true)}
+            className="fixed bottom-6 left-6 z-50 bg-noir-accent text-black p-4 rounded-full shadow-2xl hover:scale-110 transition-all animate-bounce shadow-[0_0_25px_rgba(212,175,55,0.4)]">
+            🎁
+          </button>
+
+          {surprise && (
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[999] p-4" onClick={() => setSurprise(false)}>
+              <div className="dark-glass max-w-sm w-full p-8 rounded-3xl text-center space-y-5 border border-noir-accent/30" onClick={e => e.stopPropagation()}>
+                <span className="text-7xl">💛</span>
+                <h3 className="text-2xl font-bold gold-text">Forever Yours</h3>
+                <p className="text-noir-muted">Every star in the sky reminds me of you.</p>
+                <button onClick={() => setSurprise(false)} className="bg-noir-accent text-black px-6 py-2 rounded-full font-bold">Close ✦</button>
+              </div>
+            </div>
+          )}
+
+          <footer className="text-center py-10 text-noir-muted border-t border-noir-accent/20 mt-20">
+            <p>handcrafted with devotion</p>
+            <span onClick={handleSecret} className="inline-block mt-2 text-2xl cursor-pointer hover:scale-125 transition-transform select-none">💓</span>
+          </footer>
+        </div>
+      );
+    }
+
+    // ---------- Love Counter ----------
+    function LoveCounter({ start }) {
+      const [t, setT] = useState({ d:0, h:0, m:0, s:0 });
+      useEffect(() => {
+        const calc = () => {
+          const diff = new Date() - new Date(start);
+          setT({ 
+            d: Math.floor(diff/86400000), 
+            h: Math.floor((diff/3600000)%24), 
+            m: Math.floor((diff/60000)%60), 
+            s: Math.floor((diff/1000)%60) 
+          });
+        };
+        calc();
+        const id = setInterval(calc, 1000);
+        return () => clearInterval(id);
+      }, [start]);
+      
+      return (
+        <div className="dark-glass p-8 rounded-3xl text-center border border-noir-accent/20">
+          <h3 className="text-xl font-bold text-noir-text mb-4">Days We've Loved</h3>
+          <div className="grid grid-cols-4 gap-3">
+            <div className="bg-black/40 p-3 rounded-2xl border border-noir-accent/20">
+              <span className="text-2xl md:text-3xl font-extrabold text-noir-accent">{t.d}</span>
+              <span className="block text-xs text-noir-muted mt-1">Days</span>
+            </div>
+            <div className="bg-black/40 p-3 rounded-2xl border border-noir-accent/20">
+              <span className="text-2xl md:text-3xl font-extrabold text-noir-accent">{t.h}</span>
+              <span className="block text-xs text-noir-muted mt-1">Hours</span>
+            </div>
+            <div className="bg-black/40 p-3 rounded-2xl border border-noir-accent/20">
+              <span className="text-2xl md:text-3xl font-extrabold text-noir-accent">{t.m}</span>
+              <span className="block text-xs text-noir-muted mt-1">Minutes</span>
+            </div>
+            <div className="bg-black/40 p-3 rounded-2xl border border-noir-accent/20">
+              <span className="text-2xl md:text-3xl font-extrabold text-noir-accent">{t.s}</span>
+              <span className="block text-xs text-noir-muted mt-1">Seconds</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Dark Letter ----------
+    function DarkLetter() {
+      return (
+        <div className="bg-[#111113] border border-noir-accent/30 p-8 md:p-12 rounded-xl shadow-2xl relative transform -rotate-1 hover:rotate-0 transition-transform">
+          <div className="absolute top-4 right-5 text-xs text-noir-muted italic">sealed</div>
+          <div className="space-y-5 text-noir-text serif-text text-lg leading-relaxed italic">
+            <p>ကိုယ့်ရဲ့ချစ်ရတဲ့ကောင်မလေး...</p>
+            <p>ဒီနေ့ကိုကိုနဲ့ကလေးတွဲတာ၃လပြည့်သွားပြီနော်။ ကိုယ့်ဘဝရဲ့အမှောင်ဆုံးအချိန်မှာ ကလေးကအနားမှာရှိနေပေးခဲ့တယ်။ ကိုကိုတို့ကLDRSဖြစ်နေပေမယ့် တစ်ခါမှအပြင်မှာမတွေ့ဖူးပေမယ့် အခုချိန်ထိလက်တွဲမဖြုတ်ခဲ့ကြဘူး။</p>
+            <p>အခုလိုမျိုးနှစ်တွေအကြာကြီးဆက်ချစ်ကြမယ်။ ကိုကို ကလေးလေးကိုချစ်တယ် မြတ်နိုးတယ် တန်ဖိုးထားတယ်။ ကိုကို့စကားကိုအမြဲသေချာနားထောင်ပေးလို့ အရမ်းလဲသဘောကျတယ်။</p>
+            <p className="text-right font-bold text-noir-accent">ကလေးရဲ့ကိုကို</p>
+          </div>
+          <div className="flex justify-end mt-6">
+            <div className="w-14 h-14 bg-noir-accent rounded-full flex items-center justify-center text-black text-xl rotate-12 shadow-lg">⚜️</div>
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Timeline ----------
+    function Timeline() {
+      const items = [
+        { date: 'May 2, 2026', title: 'Genesis', desc: 'ကလေးဆီကအဖြေရတဲ့နေ့ ကိုကိုလို့ကလေးဆီကစကြားရတဲ့နေ့', icon: '🌑' },
+        { date: 'Jun 12', title: 'First Heartbeat', desc: 'အော် ဒီလိုကောင်မလေးလဲရှိပါလားဆိုပြီး ပိုချစ်လာတဲ့နေ့', icon: '🕯️' },
+        { date: 'Jun 26', title: 'Unexpected fate', desc: 'ကလေးရဲ့မေမေသိသွားလို့ ကိုကိုတို့အဆက်အသွယ်ပြတ်တဲ့နေ့', icon: '🌙' },
+        { date: 'Aug 2', title: 'Reunion', desc: 'ပြန်လည်ဆက်သွယ်နိုင်ခဲ့တဲ့နေ့', icon: '💫' }
+      ];
+      
+      return (
+        <div className="relative border-l-2 border-noir-accent/30 ml-4 md:ml-32 space-y-12">
+          {items.map((item, i) => (
+            <div key={i} className="relative pl-10">
+              <div className="absolute -left-[18px] top-1 w-9 h-9 bg-noir-accent rounded-full flex items-center justify-center text-black border-2 border-noir-bg shadow-[0_0_15px_rgba(212,175,55,0.5)]">
+                {item.icon}
+              </div>
+              <div className="dark-glass p-5 rounded-2xl border border-noir-accent/20">
+                <span className="text-xs font-bold text-noir-accent bg-black/50 px-3 py-1 rounded-full">{item.date}</span>
+                <h4 className="font-bold text-lg text-noir-text mt-2">{item.title}</h4>
+                <p className="text-noir-muted text-sm">{item.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // ---------- Reasons ----------
+    function ReasonsGrid() {
+      const reasons = [
+        "Your radiant smile", "Boundless kindness", "Soothing voice", "Eyes that hold galaxies",
+        "Warm embraces", "Steadfast support", "Fierce loyalty", "Effortless grace",
+        "Brilliant mind", "Safe haven presence", "Adorable quirks", "Culinary magic",
+        "Infectious laughter", "Daily inspiration", "Deep understanding", "Gentle mindset",
+        "Ambitious spirit", "Endless patience", "Caring heart", "Everything you are"
+      ];
+      return (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {reasons.map((r, i) => (
+            <div key={i} className="dark-glass p-4 rounded-2xl text-center hover:-translate-y-1 transition-transform cursor-pointer border border-noir-accent/20 hover:border-noir-accent/50">
+              <span className="text-noir-accent font-bold text-sm">#{i+1}</span>
+              <p className="text-noir-text text-sm mt-1">{r}</p>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // ---------- Gallery (Notebook/Diary Style) ----------
+    function Gallery() {
+      const [entries, setEntries] = useState(() => {
+        const saved = localStorage.getItem('love_diary');
+        return saved ? JSON.parse(saved) : [
+          { 
+            id: 1, 
+            author: 'ကိုကို', 
+            emoji: '💌',
+            title: 'ပထမဆုံးစကားပြောတဲ့နေ့', 
+            content: 'ကလေးကို စပြီးစကားပြောဖြစ်တဲ့နေ့။ Tiktokမှာတွေ့တော့ ကြည့်လိုက်တာနဲ့ချစ်စရာလေးပေါ့ တရုတ်မလေးထင်ပြီးလာHiလိုက်တာ။ မြန်မာမှန်းသိတော့ ရင်ခုန်သွားတာ။',
+            date: '2026-04-21',
+            color: 'from-rose-900/30 to-pink-900/20'
+          },
+          { 
+            id: 2, 
+            author: 'ကလေး', 
+            emoji: '🌸',
+            title: 'ကိုကို့ကို သဘောကျတဲ့အကြောင်း', 
+            content: 'ကိုကိုက ကိုယ့်ကို ဘယ်လိုဂရုစိုက်လဲဆိုတာ တဖြည်းဖြည်းသိလာတယ်။ ကိုကို့ရဲ့ကလေးဆိုတဲ့စကားကို ကြားရတိုင်း ရင်ထဲနွေးသွားတယ်။',
+            date: '2026-05-10',
+            color: 'from-purple-900/30 to-violet-900/20'
+          },
+          { 
+            id: 3, 
+            author: 'ကိုကို', 
+            emoji: '💫',  // FIXED: Added missing emoji
+            title: 'ခနတာပျောက်ကွယ်မှု', 
+            content: 'ကိုကိုပျောက်သွား...',  // FIXED: Completed the sentence
+            date: '2026-05-15',
+            color: 'from-blue-900/30 to-cyan-900/20'
+          },
+          { 
+            id: 4, 
+            author: 'ကလေး', 
+            emoji: '💭',
+            title: 'အိမ်မက်ထဲက ကိုကို', 
+            content: 'မနေ့ညက ကိုကို့ကို အိမ်မက်မက်တယ်။ ကိုယ်တို့နှစ်ယောက် လက်တွဲပြီး လမ်းလျှောက်နေတာ။ တကယ်တွေ့ချင်လိုက်တာ...',
+            date: '2026-05-20',
+            color: 'from-yellow-900/30 to-amber-900/20'
+          }
+        ];
+      });
+
+      const [showForm, setShowForm] = useState(false);
+      const [newEntry, setNewEntry] = useState({ author: 'ကိုကို', emoji: '💌', title: '', content: '' });
+      const [selectedEntry, setSelectedEntry] = useState(null);
+
+      // Save to localStorage whenever entries change
+      useEffect(() => {
+        localStorage.setItem('love_diary', JSON.stringify(entries));
+      }, [entries]);
+
+      const addEntry = (e) => {
+        e.preventDefault();
+        if (!newEntry.title.trim() || !newEntry.content.trim()) return;
+        
+        const entry = {
+          id: Date.now(),
+          author: newEntry.author,
+          emoji: newEntry.emoji,
+          title: newEntry.title.trim(),
+          content: newEntry.content.trim(),
+          date: new Date().toISOString().split('T')[0],
+          color: newEntry.author === 'ကိုကို' ? 'from-rose-900/30 to-pink-900/20' : 'from-purple-900/30 to-violet-900/20'
+        };
+        
+        setEntries(prev => [entry, ...prev]);
+        setNewEntry({ author: 'ကိုကို', emoji: '💌', title: '', content: '' });
+        setShowForm(false);
+      };
+
+      const deleteEntry = (id) => {
+        if (window.confirm('ဒီစာကိုဖျက်မှာသေချာလား?')) {
+          setEntries(prev => prev.filter(e => e.id !== id));
+        }
+      };
+
+      const emojis = ['💌', '🌸', '🎵', '💭', '💝', '🖤', '🌟', '🌙', '💫', '🦋', '🎀', '💎'];
+
+      return (
+        <React.Fragment>
+          {/* Add New Entry Button */}
+          <div className="text-center mb-8">
+            <button 
+              onClick={() => setShowForm(!showForm)}
+              className="bg-noir-accent hover:bg-amber-500 text-black font-bold py-3 px-8 rounded-full transition-all shadow-lg hover:scale-105"
+            >
+              {showForm ? '✕ Close' : '✎ New Memory'}
+            </button>
+          </div>
+
+          {/* New Entry Form */}
+          {showForm && (
+            <div className="dark-glass p-6 rounded-3xl mb-8 border border-noir-accent/30">
+              <form onSubmit={addEntry} className="space-y-4 max-w-lg mx-auto">
+                <div className="flex gap-3">
+                  <select 
+                    value={newEntry.author}
+                    onChange={e => setNewEntry(prev => ({...prev, author: e.target.value}))}
+                    className="bg-black/50 border border-noir-accent/30 rounded-xl px-4 py-2 text-noir-text"
+                  >
+                    <option value="ကိုကို">ကိုကို ✦</option>
+                    <option value="ကလေး">ကလေး 🌸</option>
+                  </select>
+                  
+                  <select 
+                    value={newEntry.emoji}
+                    onChange={e => setNewEntry(prev => ({...prev, emoji: e.target.value}))}
+                    className="bg-black/50 border border-noir-accent/30 rounded-xl px-4 py-2 text-noir-text text-xl"
+                  >
+                    {emojis.map(e => <option key={e} value={e}>{e}</option>)}
+                  </select>
+                </div>
+                
+                <input 
+                  value={newEntry.title}
+                  onChange={e => setNewEntry(prev => ({...prev, title: e.target.value}))}
+                  placeholder="ခေါင်းစဉ်..."
+                  className="w-full p-3 rounded-xl bg-black/50 border border-noir-accent/30 text-noir-text placeholder-noir-muted outline-none"
+                />
+                
+                <textarea 
+                  value={newEntry.content}
+                  onChange={e => setNewEntry(prev => ({...prev, content: e.target.value}))}
+                  placeholder="ဒီနေ့အတွက် ခံစားချက်... ကိုယ်ပြောချင်တာလေး..."
+                  rows="4"
+                  className="w-full p-3 rounded-xl bg-black/50 border border-noir-accent/30 text-noir-text placeholder-noir-muted outline-none"
+                />
+                
+                <button type="submit" className="w-full bg-noir-accent hover:bg-amber-500 text-black font-bold py-3 rounded-xl transition-all">
+                  Save to Diary ✦
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* Notebook Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {entries.map((entry) => (
+              <div 
+                key={entry.id} 
+                className={`dark-glass rounded-2xl p-6 cursor-pointer hover:scale-[1.02] transition-all duration-300 border border-noir-accent/20 hover:border-noir-accent/50 bg-gradient-to-br ${entry.color} relative group`}
+                onClick={() => setSelectedEntry(entry)}
+              >
+                {/* Notebook Lines */}
+                <div className="absolute inset-0 opacity-5 pointer-events-none">
+                  {[...Array(12)].map((_, i) => (
+                    <div key={i} className="border-b border-white w-full" style={{marginTop: '18px'}}></div>
+                  ))}
+                </div>
+                
+                {/* Paper clip/decoration */}
+                <div className="absolute -top-2 -right-2 text-2xl opacity-60 group-hover:opacity-100 transition-opacity">
+                  📎
+                </div>
+
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-3xl">{entry.emoji}</span>
+                    <span className="text-xs text-noir-muted bg-black/30 px-2 py-1 rounded-full">{entry.date}</span>
+                  </div>
+                  
+                  <h3 className="font-bold text-noir-accent text-lg mb-2">{entry.title}</h3>
+                  
+                  <p className="text-noir-text text-sm line-clamp-3 italic leading-relaxed">
+                    "{entry.content.substring(0, 100)}{entry.content.length > 100 ? '...' : ''}"
+                  </p>
+                  
+                  {/* FIXED: Properly closed the div with delete button */}
+                  <div className="flex justify-end mt-3">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteEntry(entry.id);
+                      }}
+                      className="text-noir-muted hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {entries.length === 0 && (
+            <div className="text-center py-20">
+              <span className="text-8xl block mb-4">📖</span>
+              <p className="text-noir-muted italic text-lg">ကိုယ်တို့ရဲ့ဒိုင်ယာရီမှာ စာတစ်ကြောင်းမှမရှိသေးဘူး...</p>
+              <p className="text-noir-muted text-sm mt-2">"New Memory" ခလုတ်နှိပ်ပြီး စရေးလို့ရပါပြီ</p>
+            </div>
+          )}
+
+          {/* View Entry Modal */}
+          {selectedEntry && (
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[999] p-4" onClick={() => setSelectedEntry(null)}>
+              <div 
+                className={`dark-glass max-w-lg w-full rounded-3xl p-8 md:p-10 bg-gradient-to-br ${selectedEntry.color} border border-noir-accent/40 relative`}
+                onClick={e => e.stopPropagation()}
+              >
+                {/* Notebook paper texture */}
+                <div className="absolute inset-0 opacity-5 pointer-events-none rounded-3xl overflow-hidden">
+                  {[...Array(20)].map((_, i) => (
+                    <div key={i} className="border-b border-white w-full" style={{marginTop: '22px'}}></div>
+                  ))}
+                </div>
+
+                <div className="relative z-10 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-6xl">{selectedEntry.emoji}</span>
+                    <button 
+                      onClick={() => setSelectedEntry(null)}
+                      className="text-noir-muted hover:text-white text-2xl"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  
+                  <div>
+                    <span className="text-xs text-noir-muted bg-black/30 px-3 py-1 rounded-full">
+                      {selectedEntry.date}
+                    </span>
+                    <span className="text-xs text-noir-muted ml-2">
+                      — {selectedEntry.author === 'ကိုကို' ? '🖤 ကိုကို' : '🌸 ကလေး'}
+                    </span>
+                  </div>
+                  
+                  <h3 className="text-2xl font-bold gold-text script-text">{selectedEntry.title}</h3>
+                  
+                  <div className="bg-black/30 p-6 rounded-2xl">
+                    <p className="text-noir-text text-lg leading-relaxed italic serif-text whitespace-pre-wrap">
+                      "{selectedEntry.content}"
+                    </p>
+                  </div>
+                  
+                  <div className="flex justify-between items-center pt-4">
+                    <button 
+                      onClick={() => {
+                        deleteEntry(selectedEntry.id);
+                        setSelectedEntry(null);
+                      }}
+                      className="text-noir-muted hover:text-red-400 text-sm"
+                    >
+                      🗑️ Delete
+                    </button>
+                    <button 
+                      onClick={() => setSelectedEntry(null)}
+                      className="bg-noir-accent text-black px-6 py-2 rounded-full font-bold hover:bg-amber-500 transition-all"
+                    >
+                      Close ✦
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </React.Fragment>
+      );
+    }
+
+    // ---------- Wish Wall ----------
+    function WishWall() {
+      const [wishes, setWishes] = useState([]);
+      const [name, setName] = useState('');
+      const [msg, setMsg] = useState('');
+      useEffect(() => {
+        const s = localStorage.getItem('dark_wishes');
+        if (s) setWishes(JSON.parse(s));
+      }, []);
+      const add = (e) => {
+        e.preventDefault();
+        if (!name.trim() || !msg.trim()) return;
+        const w = { id: Date.now(), name: name.trim(), msg: msg.trim(), date: new Date().toLocaleDateString() };
+        const updated = [w, ...wishes];
+        setWishes(updated);
+        localStorage.setItem('dark_wishes', JSON.stringify(updated));
+        setName(''); setMsg('');
+      };
+      return (
+        <div className="dark-glass p-8 rounded-3xl space-y-6 border border-noir-accent/20">
+          <h3 className="text-2xl font-bold gold-text text-center script-text">Wish Wall</h3>
+          <form onSubmit={add} className="space-y-3 max-w-md mx-auto">
+            <input value={name} onChange={e=>setName(e.target.value)} placeholder="Your name" className="w-full p-3 rounded-xl bg-black/50 border border-noir-accent/30 text-noir-text placeholder-noir-muted outline-none" />
+            <textarea value={msg} onChange={e=>setMsg(e.target.value)} placeholder="A wish for us..." className="w-full p-3 rounded-xl bg-black/50 border border-noir-accent/30 text-noir-text placeholder-noir-muted h-20 outline-none" />
+            <button type="submit" className="w-full bg-noir-accent hover:bg-amber-500 text-black font-bold py-2 rounded-xl transition-all">Post ✦</button>
+          </form>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-1">
+            {wishes.length===0 ? <p className="text-noir-muted italic text-center col-span-2">No wishes yet...</p> :
+              wishes.map(w=>(
+                <div key={w.id} className="bg-black/40 p-3 rounded-2xl border border-noir-accent/20">
+                  <span className="text-xs text-noir-muted">{w.date}</span>
+                  <h5 className="font-bold text-noir-accent">✦ {w.name}</h5>
+                  <p className="text-noir-text text-sm italic">"{w.msg}"</p>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Music Player (with Volume Control) ----------
+    function MusicPlayer({ audioRef }) {
+      const [on, setOn] = useState(false);
+      const [volume, setVolume] = useState(0.5); // Volume 0.0 ကနေ 1.0
+      
+      const toggle = () => {
+        if (!audioRef.current) return;
+        if (on) {
+          audioRef.current.pause();
+        } else {
+          audioRef.current.volume = volume;
+          audioRef.current.play().catch(()=>{});
+        }
+        setOn(!on);
+      };
+
+      const handleVolumeChange = (e) => {
+        const newVolume = parseFloat(e.target.value);
+        setVolume(newVolume);
+        if (audioRef.current) {
+          audioRef.current.volume = newVolume;
+        }
+      };
+
+      return (
+        <div className="fixed bottom-6 right-6 z-50 bg-black/70 backdrop-blur-md border border-noir-accent/30 px-4 py-3 rounded-full shadow-xl flex items-center gap-3">
+          <button 
+            onClick={toggle} 
+            className="bg-noir-accent text-black p-2 rounded-full w-9 h-9 flex items-center justify-center hover:bg-amber-500 transition-all"
+          >
+            {on ? '⏸' : '▶'}
+          </button>
+          
+          {/* Volume Slider */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-noir-muted">🔈</span>
+            <input 
+              type="range" 
+              min="0" 
+              max="1" 
+              step="0.05" 
+              value={volume}
+              onChange={handleVolumeChange}
+              className="w-16 md:w-24 h-1 bg-noir-muted rounded-full appearance-none cursor-pointer
+                [&::-webkit-slider-thumb]:appearance-none 
+                [&::-webkit-slider-thumb]:w-3 
+                [&::-webkit-slider-thumb]:h-3 
+                [&::-webkit-slider-thumb]:bg-noir-accent 
+                [&::-webkit-slider-thumb]:rounded-full 
+                [&::-webkit-slider-thumb]:shadow-lg
+                [&::-webkit-slider-thumb]:cursor-pointer"
+            />
+            <span className="text-xs text-noir-muted">🔊</span>
+          </div>
+          
+          <span className="text-xs font-bold text-noir-muted hidden md:inline">moonlight</span>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
