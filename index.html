@@ -475,42 +475,7 @@
       const [entries, setEntries] = useState(() => {
         const saved = localStorage.getItem('love_diary');
         return saved ? JSON.parse(saved) : [
-          { 
-            id: 1, 
-            author: 'ကိုကို', 
-            emoji: '💌',
-            title: 'ပထမဆုံးစကားပြောတဲ့နေ့', 
-            content: 'ကလေးကို စပြီးစကားပြောဖြစ်တဲ့နေ့။ Tiktokမှာတွေ့တော့ ကြည့်လိုက်တာနဲ့ချစ်စရာလေးပေါ့ တရုတ်မလေးထင်ပြီးလာHiလိုက်တာ။ မြန်မာမှန်းသိတော့ ရင်ခုန်သွားတာ။',
-            date: '2026-04-21',
-            color: 'from-rose-900/30 to-pink-900/20'
-          },
-          { 
-            id: 2, 
-            author: 'ကလေး', 
-            emoji: '🌸',
-            title: 'ကိုကို့ကို သဘောကျတဲ့အကြောင်း', 
-            content: 'ကိုကိုက ကိုယ့်ကို ဘယ်လိုဂရုစိုက်လဲဆိုတာ တဖြည်းဖြည်းသိလာတယ်။ ကိုကို့ရဲ့ကလေးဆိုတဲ့စကားကို ကြားရတိုင်း ရင်ထဲနွေးသွားတယ်။',
-            date: '2026-05-10',
-            color: 'from-purple-900/30 to-violet-900/20'
-          },
-          { 
-            id: 3, 
-            author: 'ကိုကို', 
-            emoji: '💫',  // FIXED: Added missing emoji
-            title: 'ခနတာပျောက်ကွယ်မှု', 
-            content: 'ကိုကိုပျောက်သွား...',  // FIXED: Completed the sentence
-            date: '2026-05-15',
-            color: 'from-blue-900/30 to-cyan-900/20'
-          },
-          { 
-            id: 4, 
-            author: 'ကလေး', 
-            emoji: '💭',
-            title: 'အိမ်မက်ထဲက ကိုကို', 
-            content: 'မနေ့ညက ကိုကို့ကို အိမ်မက်မက်တယ်။ ကိုယ်တို့နှစ်ယောက် လက်တွဲပြီး လမ်းလျှောက်နေတာ။ တကယ်တွေ့ချင်လိုက်တာ...',
-            date: '2026-05-20',
-            color: 'from-yellow-900/30 to-amber-900/20'
-          }
+        
         ];
       });
 
