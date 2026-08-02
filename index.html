@@ -737,22 +737,66 @@
       );
     }
 
-   // ---------- Music Player ----------
+// ---------- Music Player (with Volume Control) ----------
     function MusicPlayer({ audioRef }) {
       const [on, setOn] = useState(false);
+      const [volume, setVolume] = useState(0.5); // Volume 0.0 ကနေ 1.0
+      
       const toggle = () => {
         if (!audioRef.current) return;
-        if (on) audioRef.current.pause();
-        else audioRef.current.play().catch(()=>{});
+        if (on) {
+          audioRef.current.pause();
+        } else {
+          audioRef.current.volume = volume;
+          audioRef.current.play().catch(()=>{});
+        }
         setOn(!on);
       };
+
+      const handleVolumeChange = (e) => {
+        const newVolume = parseFloat(e.target.value);
+        setVolume(newVolume);
+        if (audioRef.current) {
+          audioRef.current.volume = newVolume;
+        }
+      };
+
       return (
-        <div className="fixed bottom-6 right-6 z-50 bg-black/70 backdrop-blur-md border border-noir-accent/30 px-4 py-2 rounded-full shadow-xl flex items-center gap-3">
-          <button onClick={toggle} className="bg-noir-accent text-black p-2 rounded-full w-9 h-9 flex items-center justify-center">{on ? '⏸' : '▶'}</button>
-          <span className="text-xs font-bold text-noir-muted">moonlight</span>
+        <div className="fixed bottom-6 right-6 z-50 bg-black/70 backdrop-blur-md border border-noir-accent/30 px-4 py-3 rounded-full shadow-xl flex items-center gap-3">
+          <button 
+            onClick={toggle} 
+            className="bg-noir-accent text-black p-2 rounded-full w-9 h-9 flex items-center justify-center hover:bg-amber-500 transition-all"
+          >
+            {on ? '⏸' : '▶'}
+          </button>
+          
+          {/* Volume Slider */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-noir-muted">🔈</span>
+            <input 
+              type="range" 
+              min="0" 
+              max="1" 
+              step="0.05" 
+              value={volume}
+              onChange={handleVolumeChange}
+              className="w-16 md:w-24 h-1 bg-noir-muted rounded-full appearance-none cursor-pointer
+                [&::-webkit-slider-thumb]:appearance-none 
+                [&::-webkit-slider-thumb]:w-3 
+                [&::-webkit-slider-thumb]:h-3 
+                [&::-webkit-slider-thumb]:bg-noir-accent 
+                [&::-webkit-slider-thumb]:rounded-full 
+                [&::-webkit-slider-thumb]:shadow-lg
+                [&::-webkit-slider-thumb]:cursor-pointer"
+            />
+            <span className="text-xs text-noir-muted">🔊</span>
+          </div>
+          
+          <span className="text-xs font-bold text-noir-muted hidden md:inline">moonlight</span>
         </div>
       );
     }
+
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
